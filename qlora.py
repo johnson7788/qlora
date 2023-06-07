@@ -28,7 +28,7 @@ from transformers import (
     LlamaTokenizer
 
 )
-from datasets import load_dataset, Dataset
+from datasets import load_dataset, Dataset,DownloadConfig
 import evaluate
 
 from peft import (
@@ -92,6 +92,10 @@ class DataArguments:
     dataset_format: Optional[str] = field(
         default=None,
         metadata={"help": "Which dataset format is used. [alpaca|chip2|self-instruct|hh-rlhf]"}
+    )
+    proxy: Optional[bool] = field(
+        default=False,
+        metadata={"help": "数据集下载时是否使用代理，请进行设置http代理"}
     )
 
 @dataclass
@@ -498,19 +502,23 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
         - vicuna
 
     """
+    if args.proxy:
+        download_config = DownloadConfig(proxies={'https': 'http://192.168.50.189:7890', 'http': 'http://192.168.50.189:7890'})
+    else:
+        download_config = None
     def load_data(dataset_name):
         if dataset_name == 'alpaca':
-            return load_dataset("tatsu-lab/alpaca")
+            return load_dataset("tatsu-lab/alpaca",download_config=download_config)
         elif dataset_name == 'alpaca-clean':
-            return load_dataset("yahma/alpaca-cleaned")
+            return load_dataset("yahma/alpaca-cleaned",download_config=download_config)
         elif dataset_name == 'chip2':
-            return load_dataset("laion/OIG", data_files='unified_chip2.jsonl')
+            return load_dataset("laion/OIG", data_files='unified_chip2.jsonl',download_config=download_config)
         elif dataset_name == 'self-instruct':
-            return load_dataset("yizhongw/self_instruct", name='self_instruct')
+            return load_dataset("yizhongw/self_instruct", name='self_instruct',download_config=download_config)
         elif dataset_name == 'hh-rlhf':
-            return load_dataset("Anthropic/hh-rlhf")
+            return load_dataset("Anthropic/hh-rlhf",download_config=download_config)
         elif dataset_name == 'longform':
-            return load_dataset("akoksal/LongForm")
+            return load_dataset("akoksal/LongForm",download_config=download_config)
         elif dataset_name == 'oasst1':
             return load_dataset("timdettmers/openassistant-guanaco")
         elif dataset_name == 'vicuna':
