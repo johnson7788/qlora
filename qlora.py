@@ -263,7 +263,7 @@ def get_accelerate_model(args, checkpoint_dir):
 
     if args.full_finetune: assert args.bits in [16, 32]
 
-    print(f'loading base model {args.model_name_or_path}...')
+    print(f'加载base模型{args.model_name_or_path}...')
     compute_dtype = (torch.float16 if args.fp16 else (torch.bfloat16 if args.bf16 else torch.float32))
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
@@ -306,7 +306,7 @@ def get_accelerate_model(args, checkpoint_dir):
             print("Loading adapters from checkpoint.")
             model = PeftModel.from_pretrained(model, join(checkpoint_dir, 'adapter_model'), is_trainable=True)
         else:
-            print(f'adding LoRA modules...')
+            print(f'不是完全微调模型，开始添加LoRA模块...')
             modules = find_all_linear_names(args, model)
             config = LoraConfig(
                 r=args.lora_r,
@@ -628,7 +628,7 @@ def train():
 
     model.config.use_cache = False
     print_trainable_parameters(args, model)
-    print('loaded model')
+    print('模型加载成功! ')
     set_seed(args.seed)
 
     # Tokenizer
@@ -650,7 +650,7 @@ def train():
         # Check and add them if missing to prevent them from being parsed into different tokens.
         # Note that these are present in the vocabulary. 
         # Note also that `model.config.pad_token_id` is 0 which corresponds to `<unk>` token.
-        print('Adding special tokens.')
+        print('使用的LLAMA模型，添加特殊tokens.')
         tokenizer.add_special_tokens({
                 "eos_token": tokenizer.convert_ids_to_tokens(model.config.eos_token_id),
                 "bos_token": tokenizer.convert_ids_to_tokens(model.config.bos_token_id),
