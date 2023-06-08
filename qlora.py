@@ -307,7 +307,7 @@ def get_accelerate_model(args, checkpoint_dir):
 
     if not args.full_finetune:
         if checkpoint_dir is not None:
-            print("Loading adapters from checkpoint.")
+            print("加载已经训练的Lora的模型权重")
             model = PeftModel.from_pretrained(model, join(checkpoint_dir, 'adapter_model'), is_trainable=True)
         else:
             print(f'不是完全微调模型，开始添加LoRA模块...')
