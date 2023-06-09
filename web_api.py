@@ -343,10 +343,13 @@ def get_response(input,history,temperature=0.7, top_p=0.9, top_k=0, repetition_p
 
     t2 = Thread(target=log_after_stream_complete)
     t2.start()
-
+    input_length = len(messages) # 用于判断哪些是新生成的
     # Initialize an empty string to store the generated text
     partial_text = ""
+    total = 0
     for new_text in streamer:
+        total += 1
+        logging.info(f"生成的新的内容是: {new_text}")
         partial_text += new_text
     history[-1][1] = partial_text
     return partial_text, history
@@ -432,10 +435,10 @@ if __name__ == '__main__':
         tok.bos_token_id = 1
     else:
         tok = AutoTokenizer.from_pretrained(model_name)
-    stop_token_ids = [0]
+    stop_token_ids = [0,2]  # 0: pad, 2: eos??
 
     print(f"成功加载模型 {model_name}到内存")
 
     max_new_tokens = 1536
-    start_message = """一个好奇的人和一个人工智能助手之间的聊天。 助手对用户的问题给出有用的、详细的和礼貌的回答。"""
+    start_message = "A chat between a curious human and an artificial intelligence assistant. \nThe assistant gives helpful, detailed, and polite answers to the human's questions."
     app.run(host='0.0.0.0', port=7087, debug=False, threaded=True)
