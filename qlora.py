@@ -155,6 +155,10 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         default=1,
         metadata={"help": "对几个modules进行lora，默认是1个"}
     )
+    lora_modules_names: str = field(
+        default=None,
+        metadata={"help": "和参数lora_modules_num互斥，如果给定lora_modules_names，优先names，即对哪些词使用lora"}
+    )
     lora_alpha: float = field(
         default=16,
         metadata={"help": " Lora alpha."}
@@ -316,8 +320,14 @@ def get_accelerate_model(args, checkpoint_dir):
         else:
             print(f'不是完全微调模型，开始添加LoRA模块...')
             modules = find_all_linear_names(args, model)
-            print(f"共有{len(modules)}个模块需要添加LoRA模块，分别是: {modules},但我们仅需要设置{args.lora_modules_num}个模块")
-            modules = modules[:args.lora_modules_num]
+            if args.lora_modules_names:
+                lora_models = args.lora_modules_names.split(',')
+                for lora_model in lora_models:
+                    assert lora_model in modules, f"模型中不存在{lora_model}模块"
+                modules = lora_models
+            else:
+                print(f"共有{len(modules)}个模块需要添加LoRA模块，分别是: {modules},但我们仅需要设置{args.lora_modules_num}个模块")
+                modules = modules[:args.lora_modules_num]
             config = LoraConfig(
                 r=args.lora_r,
                 lora_alpha=args.lora_alpha,
@@ -449,24 +459,37 @@ def extract_unnatural_instructions_data(examples, extract_reformulations=False):
                     out['output'].append(instance['output'])
     return out
 
-ALPACA_PROMPT_DICT = {
+# ALPACA_PROMPT_DICT = {
+#     "prompt_input": (
+#         "Below is an instruction that describes a task, paired with an input that provides further context. "
+#         "Write a response that appropriately completes the request.\n\n"
+#         "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response: "
+#     ),
+#     "prompt_no_input": (
+#         "Below is an instruction that describes a task. "
+#         "Write a response that appropriately completes the request.\n\n"
+#         "### Instruction:\n{instruction}\n\n### Response: "
+#     ),
+# }
+
+ZH_PROMPT_DICT = {
     "prompt_input": (
-        "Below is an instruction that describes a task, paired with an input that provides further context. "
-        "Write a response that appropriately completes the request.\n\n"
-        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response: "
+        "下面是描述任务的一个指令, 输入和提供的上下文是配对的。 "
+        "根据提问写一个合适的回答\n\n"
+        "### 指令:\n{instruction}\n\n### 上下文:\n{input}\n\n### 回答:"
     ),
     "prompt_no_input": (
-        "Below is an instruction that describes a task. "
-        "Write a response that appropriately completes the request.\n\n"
-        "### Instruction:\n{instruction}\n\n### Response: "
+        "下面是描述任务的一个指令。"
+        "根据提问写一个合适的回答。\n\n"
+        "### 指令:\n{instruction}\n\n### 回答:"
     ),
 }
 
 def extract_alpaca_dataset(example):
     if example.get("input", "") != "":
-        prompt_format = ALPACA_PROMPT_DICT["prompt_input"]
+        prompt_format = ZH_PROMPT_DICT["prompt_input"]
     else:
-        prompt_format = ALPACA_PROMPT_DICT["prompt_no_input"]
+        prompt_format = ZH_PROMPT_DICT["prompt_no_input"]
     return {'input': prompt_format.format(**example)}
 
 def local_dataset(dataset_name):
