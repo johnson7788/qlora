@@ -151,6 +151,10 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         default=64,
         metadata={"help": "Lora R dimension."}
     )
+    lora_modules_num: int = field(
+        default=1,
+        metadata={"help": "对几个modules进行lora，默认是1个"}
+    )
     lora_alpha: float = field(
         default=16,
         metadata={"help": " Lora alpha."}
@@ -312,6 +316,8 @@ def get_accelerate_model(args, checkpoint_dir):
         else:
             print(f'不是完全微调模型，开始添加LoRA模块...')
             modules = find_all_linear_names(args, model)
+            print(f"共有{len(modules)}个模块需要添加LoRA模块，分别是: {modules},但我们仅需要设置{args.lora_modules_num}个模块")
+            modules = modules[:args.lora_modules_num]
             config = LoraConfig(
                 r=args.lora_r,
                 lora_alpha=args.lora_alpha,
@@ -627,7 +633,7 @@ def train():
     args = argparse.Namespace(
         **vars(model_args), **vars(data_args), **vars(training_args)
     )
-
+    print(f"所有参数: {args}")
     checkpoint_dir, completed_training = get_last_checkpoint(args.output_dir)
     if completed_training:
         print('Detected that training was already completed!')
