@@ -659,7 +659,7 @@ def train():
     print(f"所有参数: {args}")
     checkpoint_dir, completed_training = get_last_checkpoint(args.output_dir)
     if completed_training:
-        print('Detected that training was already completed!')
+        print('发现所有训练任务已经完成!')
 
     model = get_accelerate_model(args, checkpoint_dir)
 
