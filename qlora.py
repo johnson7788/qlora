@@ -459,37 +459,37 @@ def extract_unnatural_instructions_data(examples, extract_reformulations=False):
                     out['output'].append(instance['output'])
     return out
 
-# ALPACA_PROMPT_DICT = {
-#     "prompt_input": (
-#         "Below is an instruction that describes a task, paired with an input that provides further context. "
-#         "Write a response that appropriately completes the request.\n\n"
-#         "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response: "
-#     ),
-#     "prompt_no_input": (
-#         "Below is an instruction that describes a task. "
-#         "Write a response that appropriately completes the request.\n\n"
-#         "### Instruction:\n{instruction}\n\n### Response: "
-#     ),
-# }
-
-ZH_PROMPT_DICT = {
+ALPACA_PROMPT_DICT = {
     "prompt_input": (
-        "下面是描述任务的一个指令, 输入和提供的上下文是配对的。 "
-        "根据提问写一个合适的回答\n\n"
-        "### 指令:\n{instruction}\n\n### 上下文:\n{input}\n\n### 回答:"
+        "Below is an instruction that describes a task, paired with an input that provides further context. "
+        "Write a response that appropriately completes the request.\n\n"
+        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response: "
     ),
     "prompt_no_input": (
-        "下面是描述任务的一个指令。"
-        "根据提问写一个合适的回答。\n\n"
-        "### 指令:\n{instruction}\n\n### 回答:"
+        "Below is an instruction that describes a task. "
+        "Write a response that appropriately completes the request.\n\n"
+        "### Instruction:\n{instruction}\n\n### Response: "
     ),
 }
 
+# ZH_PROMPT_DICT = {
+#     "prompt_input": (
+#         "下面是描述任务的一个指令, 输入和提供的上下文是配对的。 "
+#         "根据提问写一个合适的回答\n\n"
+#         "### 指令:\n{instruction}\n\n### 上下文:\n{input}\n\n### 回答:"
+#     ),
+#     "prompt_no_input": (
+#         "下面是描述任务的一个指令。"
+#         "根据提问写一个合适的回答。\n\n"
+#         "### 指令:\n{instruction}\n\n### 回答:"
+#     ),
+# }
+
 def extract_alpaca_dataset(example):
     if example.get("input", "") != "":
-        prompt_format = ZH_PROMPT_DICT["prompt_input"]
+        prompt_format = ALPACA_PROMPT_DICT["prompt_input"]
     else:
-        prompt_format = ZH_PROMPT_DICT["prompt_no_input"]
+        prompt_format = ALPACA_PROMPT_DICT["prompt_no_input"]
     return {'input': prompt_format.format(**example)}
 
 def local_dataset(dataset_name):

@@ -427,7 +427,7 @@ if __name__ == '__main__':
     if enable_lora:
         print(f"使用lora模型，加载的模型是: {adapters_name}")
         m = PeftModel.from_pretrained(m, adapters_name)
-        m = m.merge_and_unload()
+        # m = m.merge_and_unload() #根据https://github.com/artidoro/qlora/issues/29，这不是必须的，可以移除了
     else:
         print(f"使用原始模型，不使用lora模型")
     if is_lambda_model:
