@@ -294,6 +294,7 @@ def get_response(input,history,temperature=0.7, top_p=0.9, top_k=0, repetition_p
     """
     获取回复
     """
+    logging.info(f"输入input是: {input}")
     conversation_id = "api"
     history = history + [[input, ""]]
     # Initialize a StopOnTokens object
@@ -301,7 +302,7 @@ def get_response(input,history,temperature=0.7, top_p=0.9, top_k=0, repetition_p
 
     # Construct the input message string for the model by concatenating the current system message and conversation history
     messages = convert_history_to_text(history)
-
+    logging.info(f"最终的输入是: {messages}")
     # Tokenize the messages string
     input_ids = tok(messages, return_tensors="pt").input_ids
     input_ids = input_ids.to(m.device)
