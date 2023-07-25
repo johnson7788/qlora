@@ -435,7 +435,7 @@ if __name__ == '__main__':
         tok = LlamaTokenizer.from_pretrained(model_name)
         tok.bos_token_id = 1
     else:
-        tok = AutoTokenizer.from_pretrained(model_name)
+        tok = AutoTokenizer.from_pretrained(model_name,trust_remote_code=True)
     stop_token_ids = [0,2]  # 0: pad, 2: eos??
 
     print(f"成功加载模型 {model_name}到内存")
